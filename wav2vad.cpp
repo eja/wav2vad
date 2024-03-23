@@ -200,13 +200,12 @@ private:
         if (!jsonStarted) {
           jsonStarted = true;
         } else {
-          printf(",\n");
+          printf(", ");
         }
         float speech = current_sample -
                        window_size_samples; // minus window_size_samples to get
                                             // precise start time point.
-        printf(" { \"time\": %.3f, \"confidence\": %.3f }",
-               1.0 * speech / sample_rate, speech_prob);
+        printf("%.3f", 1.0 * speech / sample_rate);
       }
       return;
     }
@@ -385,7 +384,7 @@ public:
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
-    std::cerr << "Usage: " << argv[0] << " <ONNX_model_file> <WAV_file>"
+    std::cerr << "Usage: " << argv[0] << " <onnx_model_file> <wav_file>"
               << std::endl;
     return 1;
   }
@@ -402,6 +401,11 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  if (sf_info.samplerate != 16000) {
+    printf("File does not have a sample rate or 16000 Hz\n");
+    return 1;
+  }
+
   // Read samples from the WAV file
   std::vector<float> input_wav(sf_info.frames);
   sf_readf_float(sndfile, input_wav.data(), sf_info.frames);
@@ -413,8 +417,8 @@ int main(int argc, char *argv[]) {
 
   // Process the audio using VadIterator
   VadIterator vad(onnx_model_file);
-  printf("[\n");
-  vad.process(input_wav, output_wav);
-  printf("\n]\n");
+  printf("[");
+  vad.process(input_wav);
+  printf("]");
   return 0;
 }
