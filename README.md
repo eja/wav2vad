@@ -1,11 +1,11 @@
 # wav2vad
 
-wav2vad is a command-line tool that performs voice activity detection (VAD) on WAV audio files. It utilizes the Silero VAD model and requires the ONNX runtime for inference. The tool processes the input audio file and outputs the detected voice activity occurences along with confidence scores in JSON format.
+wav2vad is a command-line tool that performs voice activity detection (VAD) on WAV audio files. It utilizes the Silero VAD model and requires the ONNX runtime for inference. The tool processes the input audio file and outputs the detected voice activity occurences in JSON format.
 
 ## Requirements
 
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime): Required for running the Silero VAD model.
-- [libsndfile](http://www.mega-nerd.com/libsndfile/): Required for reading and writing WAV audio files.
+- [libsndfile](http://www.mega-nerd.com/libsndfile/): Required for reading WAV audio files.
 
 ## Installation
 
