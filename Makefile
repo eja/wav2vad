@@ -1,5 +1,5 @@
 CC = g++
-LDLIBS = -lonnxruntime -lsndfile
+LDLIBS = -lonnxruntime
 
 #CFLAGS = -I../onnxruntime-linux-x64-static_lib-1.17.1-gcc-10/include/
 #LDFLAGS = -L../onnxruntime-linux-x64-static_lib-1.17.1-gcc-10/lib/
