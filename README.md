@@ -5,24 +5,17 @@ wav2vad is a command-line tool that performs voice activity detection (VAD) on W
 ## Requirements
 
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime): Required for running the Silero VAD model.
-- [libsndfile](http://www.mega-nerd.com/libsndfile/): Required for reading WAV audio files.
 
 ## Installation
 
 1. **Install ONNX Runtime:**
    - Follow the installation instructions provided in the [ONNX Runtime repository](https://github.com/microsoft/onnxruntime).
 
-2. **Install libsndfile:**
-   - You can install libsndfile using your package manager. For example, on Debian, you can use `apt`:
-     ```
-     sudo apt install libsndfile1-dev
-     ```
-
-3. **Download the Silero VAD Model:**
-   - Download the Silero VAD model from [here](https://github.com/snakers4/silero-vad/blob/master/files/silero_vad.onnx).
+2. **Download the Silero VAD Model:**
+   - Download the Silero VAD model from [here](https://github.com/snakers4/silero-vad/blob/master/src/silero_vad/data/silero_vad.onnx).
 
 
-4. **Build wav2vad:**
+3. **Build wav2vad:**
    - Clone this repository:
      ```
      git clone https://github.com/eja/wav2vad.git
@@ -52,7 +45,6 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 ## Acknowledgements
 
 - This project relies on ONNX Runtime for executing the VAD model.
-- The libsndfile library is used for reading WAV audio files.
 - This project is based on the Silero VAD example available at [snakers4/silero-vad](https://github.com/snakers4/silero-vad/tree/master/examples/cpp).
 
 
