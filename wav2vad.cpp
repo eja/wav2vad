@@ -10,12 +10,13 @@
 #include <iostream>
 #include <string>
 #include "onnxruntime_cxx_api.h"
-#include "wav.h"
 #include <cstdio>
 #include <cstdarg>
 #if __cplusplus < 201703L
 #include <memory>
 #endif
+
+// Copyright (c) 2020-present Silero Team
 
 //#define __DEBUG_SPEECH_PROB___
 
@@ -421,6 +422,139 @@ public:
     };
 };
 
+// Copyright (c) 2016 Personal (Binbin Zhang)
+
+struct WavHeader {
+  char riff[4];
+  unsigned int size;
+  char wav[4];
+  char fmt[4];
+  unsigned int fmt_size;
+  uint16_t format;
+  uint16_t channels;
+  unsigned int sample_rate;
+  unsigned int bytes_per_second;
+  uint16_t block_size;
+  uint16_t bit;
+  char data[4];
+  unsigned int data_size;
+};
+
+class WavReader {
+ public:
+  WavReader() : data_(nullptr) {}
+  explicit WavReader(const std::string& filename) { Open(filename); }
+
+  bool Open(const std::string& filename) {
+    FILE* fp = fopen(filename.c_str(), "rb");
+    if (NULL == fp) {
+      std::cout << "Error in read " << filename;
+      return false;
+    }
+
+    WavHeader header;
+    fread(&header, 1, sizeof(header), fp);
+    if (header.fmt_size < 16) {
+      printf("WaveData: expect PCM format data "
+              "to have fmt chunk of at least size 16.\n");
+      return false;
+    } else if (header.fmt_size > 16) {
+      int offset = 44 - 8 + header.fmt_size - 16;
+      fseek(fp, offset, SEEK_SET);
+      fread(header.data, 8, sizeof(char), fp);
+    }
+    while (0 != strncmp(header.data, "data", 4)) {
+      // We will just ignore the data in these chunks.
+      fseek(fp, header.data_size, SEEK_CUR);
+      // read next sub chunk
+      fread(header.data, 8, sizeof(char), fp);
+    }
+
+    if (header.data_size == 0) {
+        int offset = ftell(fp);
+        fseek(fp, 0, SEEK_END);
+        header.data_size = ftell(fp) - offset;
+        fseek(fp, offset, SEEK_SET);
+    }
+
+    num_channel_ = header.channels;
+    sample_rate_ = header.sample_rate;
+    bits_per_sample_ = header.bit;
+    int num_data = header.data_size / (bits_per_sample_ / 8);
+    data_ = new float[num_data]; // Create 1-dim array
+    num_samples_ = num_data / num_channel_;
+
+    switch (bits_per_sample_) {
+        case 8: {
+            char sample;
+            for (int i = 0; i < num_data; ++i) {
+                fread(&sample, 1, sizeof(char), fp);
+                data_[i] = static_cast<float>(sample) / 32768;
+            }
+            break;
+        }
+        case 16: {
+            int16_t sample;
+            for (int i = 0; i < num_data; ++i) {
+                fread(&sample, 1, sizeof(int16_t), fp);
+                data_[i] = static_cast<float>(sample) / 32768;
+            }
+            break;
+        }
+        case 32:
+        {
+            if (header.format == 1) //S32
+            {
+                int sample;
+                for (int i = 0; i < num_data; ++i) {
+                    fread(&sample, 1, sizeof(int), fp);
+                    data_[i] = static_cast<float>(sample) / 32768;
+                }
+            }
+            else if (header.format == 3) // IEEE-float
+            {
+                float sample;
+                for (int i = 0; i < num_data; ++i) {
+                    fread(&sample, 1, sizeof(float), fp);
+                    data_[i] = static_cast<float>(sample);
+                }
+            }
+            else {
+                printf("unsupported quantization bits\n");
+            }
+            break;
+        }
+        default:
+            printf("unsupported quantization bits\n");
+            break;
+    }
+
+    fclose(fp);
+    return true;
+  }
+
+  int num_channel() const { return num_channel_; }
+  int sample_rate() const { return sample_rate_; }
+  int bits_per_sample() const { return bits_per_sample_; }
+  int num_samples() const { return num_samples_; }
+
+  ~WavReader() {
+    delete[] data_;
+  }
+
+  const float* data() const { return data_; }
+
+ private:
+  int num_channel_;
+  int sample_rate_;
+  int bits_per_sample_;
+  int num_samples_;  // sample points per channel
+  float* data_;
+};
+
+
+// Copyright (c) 2024 Ubaldo Porcheddu <ubaldo@eja.it>
+
 void print_timestamp(float start, float end, float rate, bool comma) {
 	printf(" {");
 	printf(" \"start\": %f,", (start / rate));
@@ -440,7 +574,7 @@ int main(int argc, char *argv[]) {
   std::string wav_file = argv[2];
 	std::vector<timestamp_t> stamps;
 
-	wav::WavReader wav_reader(wav_file); //16000,1,32float
+	WavReader wav_reader(wav_file); //16000,1,32float
 	std::vector<float> input_wav(wav_reader.num_samples());
 
 	for (int i = 0; i < wav_reader.num_samples(); i++)	{
