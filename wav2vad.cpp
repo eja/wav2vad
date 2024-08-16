@@ -1,20 +1,15 @@
-#include <iostream>
-#include <vector>
-#include <sstream>
-#include <cstring>
-#include <limits>
-#include <chrono>
-#include <memory>
-#include <string>
-#include <stdexcept>
-#include <iostream>
-#include <string>
 #include "onnxruntime_cxx_api.h"
-#include <cstdio>
+#include <chrono>
 #include <cstdarg>
-#if __cplusplus < 201703L
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <limits>
 #include <memory>
-#endif
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 // Copyright (c) 2020-present Silero Team
 
@@ -556,42 +551,45 @@ class WavReader {
 // Copyright (c) 2024 Ubaldo Porcheddu <ubaldo@eja.it>
 
 void print_timestamp(float start, float end, float rate, bool comma) {
-	printf(" {");
-	printf(" \"start\": %f,", (start / rate));
-	printf(" \"end\": %f", (end / rate));
-	printf("}");
-	if (comma) { printf(","); }
-	printf("\n");
+  printf(" {");
+  printf(" \"start\": %f,", (start / rate));
+  printf(" \"end\": %f", (end / rate));
+  printf("}");
+  if (comma) {
+    printf(",");
+  }
+  printf("\n");
 }
 
 int main(int argc, char *argv[]) {
-	if (argc != 3) {
+  if (argc != 3) {
     fprintf(stderr, "Usage: %s <onnx_model_file> <wav_file>\n", argv[0]);
     return 1;
   }
 
   std::string onnx_model_file = argv[1];
   std::string wav_file = argv[2];
-	std::vector<timestamp_t> stamps;
+  std::vector<timestamp_t> stamps;
 
-	WavReader wav_reader(wav_file); //16000,1,32float
-	std::vector<float> input_wav(wav_reader.num_samples());
+  WavReader wav_reader(wav_file);
+  std::vector<float> input_wav(wav_reader.num_samples());
 
-	for (int i = 0; i < wav_reader.num_samples(); i++)	{
-		input_wav[i] = static_cast<float>(*(wav_reader.data() + i));
-	}
+  for (int i = 0; i < wav_reader.num_samples(); i++) {
+    input_wav[i] = static_cast<float>(*(wav_reader.data() + i));
+  }
 
+  VadIterator vad(onnx_model_file);
+  vad.process(input_wav);
 
-	VadIterator vad(onnx_model_file);
-
-	vad.process(input_wav);
-
-	printf("[\n");
-	stamps = vad.get_speech_timestamps();
-	for (int i = 0; i < stamps.size(); i++) {
-		bool comma = true;
-		if (i == stamps.size()-1) { comma = false; }
-		print_timestamp(stamps[i].start, stamps[i].end, wav_reader.sample_rate(), comma);	
-	}
-	printf("]\n");
+  printf("[\n");
+  stamps = vad.get_speech_timestamps();
+  for (int i = 0; i < stamps.size(); i++) {
+    bool comma = true;
+    if (i == stamps.size() - 1) {
+      comma = false;
+    }
+    print_timestamp(stamps[i].start, stamps[i].end, wav_reader.sample_rate(),
+                    comma);
+  }
+  printf("]\n");
 }
