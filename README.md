@@ -11,11 +11,7 @@ wav2vad is a command-line tool that performs voice activity detection (VAD) on W
 1. **Install ONNX Runtime:**
    - Follow the installation instructions provided in the [ONNX Runtime repository](https://github.com/microsoft/onnxruntime).
 
-2. **Download the Silero VAD Model:**
-   - Download the Silero VAD model from [here](https://github.com/snakers4/silero-vad/blob/master/src/silero_vad/data/silero_vad.onnx).
-
-
-3. **Build wav2vad:**
+2. **Build wav2vad:**
    - Clone this repository:
      ```
      git clone https://github.com/eja/wav2vad.git
@@ -30,9 +26,8 @@ wav2vad is a command-line tool that performs voice activity detection (VAD) on W
 
 After building the `wav2vad` executable, you can use it to perform voice activity detection on WAV audio files.
 
-Usage: ```./wav2vad <path_of_the_onnx_model> <path_of_the_wav_file>```
+Usage: ```./wav2vad <path_of_the_wav_file>```
 
-- `<path_of_the_onnx_model>`: Path to the ONNX model file for voice activity detection.
 - `<path_of_the_wav_file>`: Path to the input WAV audio file.
 
 
