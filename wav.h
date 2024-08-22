@@ -92,13 +92,13 @@ class WavReader {
     int num_data = header.data_size / (bits_per_sample_ / 8);
     data_ = new float[num_data]; // Create 1-dim array
     num_samples_ = num_data / num_channel_;
-
+/*
     std::cout << "num_channel_    :" << num_channel_ << std::endl;
     std::cout << "sample_rate_    :" << sample_rate_ << std::endl;
     std::cout << "bits_per_sample_:" << bits_per_sample_ << std::endl;
     std::cout << "num_samples     :" << num_data << std::endl;
     std::cout << "num_data_size   :" << header.data_size << std::endl;
-
+*/
     switch (bits_per_sample_) {
         case 8: {
             char sample;
